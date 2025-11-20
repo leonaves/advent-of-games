@@ -6,8 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "lint": "eslint src --ext .ts,.tsx,.astro",
-    "lint:fix": "eslint src --ext .ts,.tsx,.astro --fix",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "typecheck": "astro check"
   },
   "dependencies": {
@@ -17,6 +17,7 @@
     "@games/game-01": "workspace:*",
     "@games/game-02": "workspace:*",
     "@games/game-03": "workspace:*",
+    "@games/game-04": "workspace:*",
     "astro": "^4.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

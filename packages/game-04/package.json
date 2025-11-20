@@ -1,0 +1,30 @@
+{
+  "name": "@games/game-04",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/Game.tsx",
+  "types": "./src/Game.tsx",
+  "exports": {
+    ".": "./src/Game.tsx"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@advent/ui": "workspace:*",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^5.0.0",
+    "typescript": "^5.0.0"
+  }
+}
