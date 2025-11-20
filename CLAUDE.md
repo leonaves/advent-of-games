@@ -28,6 +28,7 @@ export function Game({ seed, onComplete }: GameProps) {
 ```
 
 **Props:**
+
 - `seed`: Optional random seed for deterministic gameplay
 - `onComplete`: Callback fired when game ends, receives final score
 
@@ -48,6 +49,7 @@ packages/game-XX/
 ### Creating a New Game
 
 1. **Create the package directory:**
+
    ```bash
    mkdir -p packages/game-XX/src
    ```
@@ -57,6 +59,7 @@ packages/game-XX/
    - `port` in `vite.config.ts`: `300X`
 
 3. **Implement `src/Game.tsx`:**
+
    ```tsx
    import { useState, useEffect } from 'react';
 
@@ -86,6 +89,7 @@ packages/game-XX/
 5. **Integrate into Astro site:**
 
    Update `apps/web/package.json`:
+
    ```json
    {
      "dependencies": {
@@ -95,6 +99,7 @@ packages/game-XX/
    ```
 
    Update `apps/web/src/pages/day/[n].astro`:
+
    ```astro
    ---
    import { Game as DayX } from '@games/game-XX';
@@ -122,6 +127,7 @@ packages/game-XX/
    Update `apps/web/src/pages/index.astro` to add game to list.
 
 6. **Test both modes:**
+
    ```bash
    # Standalone mode
    pnpm --filter @games/game-XX dev
@@ -171,6 +177,7 @@ import '@advent/ui/styles';
 ```
 
 This provides:
+
 - Tailwind base styles
 - CSS custom properties for colors
 - Star animation background
@@ -178,18 +185,21 @@ This provides:
 #### Theme Colors
 
 **Neon Palette (Primary):**
+
 - `text-neon-blue` / `bg-neon-blue`: #00F3FF (cyan)
 - `text-neon-pink` / `bg-neon-pink`: #FF003C (hot pink)
 - `text-neon-purple` / `bg-neon-purple`: #BC13FE (violet)
 - `text-neon-green` / `bg-neon-green`: #00FF9D (mint)
 
 **Christmas Palette (Secondary):**
+
 - `text-christmas-red` / `bg-christmas-red`: #FF003C
 - `text-christmas-green` / `bg-christmas-green`: #00F3FF
 - `text-christmas-gold` / `bg-christmas-gold`: #F8B229
 - `text-christmas-midnight` / `bg-christmas-midnight`: #050B14
 
 **Glass/Transparency:**
+
 - `border-glass-border`: rgba(255, 255, 255, 0.1)
 - `bg-glass-surface`: rgba(255, 255, 255, 0.05)
 - `bg-glass-highlight`: rgba(255, 255, 255, 0.2)
@@ -201,19 +211,17 @@ This provides:
 ```tsx
 <div className="relative">
   {/* Glow effect */}
-  <div className="absolute -inset-[4px] bg-gradient-to-r from-neon-blue via-neon-purple to-neon-pink opacity-60 blur-sm" />
+  <div className="from-neon-blue via-neon-purple to-neon-pink absolute -inset-[4px] bg-gradient-to-r opacity-60 blur-sm" />
 
   {/* Card */}
-  <div className="relative bg-black/80 border-2 border-white/10 backdrop-blur-xl p-8">
-    Content
-  </div>
+  <div className="relative border-2 border-white/10 bg-black/80 p-8 backdrop-blur-xl">Content</div>
 </div>
 ```
 
 #### Neon Buttons
 
 ```tsx
-<button className="bg-neon-blue hover:bg-neon-green text-black font-bold py-4 px-8 rounded-lg border-4 border-white/30 shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all transform hover:scale-105">
+<button className="bg-neon-blue hover:bg-neon-green transform rounded-lg border-4 border-white/30 px-8 py-4 font-bold text-black shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all hover:scale-105">
   Click Me
 </button>
 ```
@@ -221,7 +229,7 @@ This provides:
 #### Gradient Text
 
 ```tsx
-<h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-green to-neon-blue">
+<h1 className="from-neon-green to-neon-blue bg-gradient-to-r bg-clip-text text-5xl font-bold text-transparent">
   Title
 </h1>
 ```
@@ -231,6 +239,7 @@ This provides:
 ### Scripts
 
 **Root level:**
+
 - `pnpm dev` - Run main Astro site
 - `pnpm build` - Build all packages
 - `pnpm lint` - Lint all packages
@@ -240,6 +249,7 @@ This provides:
 - `pnpm typecheck` - Type-check all packages
 
 **Per-package:**
+
 - `pnpm --filter @games/game-XX dev` - Run game standalone
 - `pnpm --filter @games/game-XX build` - Build game
 - `pnpm --filter @games/game-XX lint` - Lint game
@@ -248,21 +258,25 @@ This provides:
 ### Code Quality
 
 **ESLint** checks TypeScript/React code:
+
 - No unused variables (warnings)
 - React hooks rules
 - TypeScript-aware
 
 **Prettier** formats:
+
 - JavaScript/TypeScript
 - Astro files (via plugin)
 - Tailwind class ordering (via plugin)
 - JSON, Markdown, CSS
 
 **Stylelint** checks CSS:
+
 - Standard CSS rules
 - Tailwind directives allowed
 
 **TypeScript** checks:
+
 - Strict mode enabled
 - Type safety across all packages
 
@@ -306,6 +320,7 @@ pnpm build
 ```
 
 This runs build in all packages:
+
 1. Games are built with Vite (for dev harness)
 2. Astro site is built with all games as islands
 
@@ -318,6 +333,7 @@ Games are rendered as React islands using `client:load`:
 ```
 
 This means:
+
 - Game JS is code-split automatically
 - Game only hydrates when loaded
 - Each game is an independent bundle
