@@ -18,6 +18,7 @@
     "@games/game-02": "workspace:*",
     "@games/game-03": "workspace:*",
     "@games/game-04": "workspace:*",
+    "@games/game-05": "workspace:*",
     "astro": "^4.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

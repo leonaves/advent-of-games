@@ -71,6 +71,9 @@ importers:
       '@games/game-04':
         specifier: workspace:*
         version: link:../../packages/game-04
+      '@games/game-05':
+        specifier: workspace:*
+        version: link:../../packages/game-05
       astro:
         specifier: ^4.0.0
         version: 4.16.19(@types/node@24.10.1)(rollup@4.53.3)(typescript@5.9.3)
@@ -217,6 +220,34 @@ importers:
       vite:
         specifier: ^5.0.0
         version: 5.4.21(@types/node@20.19.25)
+
+  packages/game-05:
+    dependencies:
+      react:
+        specifier: ^18.0.0
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.0.0
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
+      '@types/react':
+        specifier: ^18.0.0
+        version: 18.3.27
+      '@types/react-dom':
+        specifier: ^18.0.0
+        version: 18.3.7(@types/react@18.3.27)
+      '@vitejs/plugin-react':
+        specifier: ^4.0.0
+        version: 4.7.0(vite@5.4.21(@types/node@24.10.1))
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vite:
+        specifier: ^5.0.0
+        version: 5.4.21(@types/node@24.10.1)
 
   packages/ui:
     dependencies:

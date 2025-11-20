@@ -4,6 +4,7 @@ import { Game as Day1 } from '@games/game-01';
 import { Game as Day2 } from '@games/game-02';
 import { Game as Day3 } from '@games/game-03';
 import { Game as Day4 } from '@games/game-04';
+import { Game as Day5 } from '@games/game-05';
 
 export function getStaticPaths() {
   return [
@@ -11,6 +12,7 @@ export function getStaticPaths() {
     { params: { n: '2' } },
     { params: { n: '3' } },
     { params: { n: '4' } },
+    { params: { n: '5' } },
   ];
 }
 
@@ -22,6 +24,7 @@ const gameTitles: Record<number, string> = {
   2: 'Hay Girl',
   3: 'Nomoji',
   4: 'Froggle',
+  5: 'Mastermind',
 };
 
 const gameTitle = gameTitles[dayNumber] || `Game ${dayNumber}`;
@@ -49,6 +52,7 @@ const gameTitle = gameTitles[dayNumber] || `Game ${dayNumber}`;
         {dayNumber === 2 && <Day2 client:load />}
         {dayNumber === 3 && <Day3 client:load />}
         {dayNumber === 4 && <Day4 client:load />}
+        {dayNumber === 5 && <Day5 client:load />}
       </div>
 
       <div class="mt-8 text-center text-gray-400">
