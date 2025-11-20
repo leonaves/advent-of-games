@@ -89,21 +89,26 @@ class SnakeGame {
 
   handleInput(e: KeyboardEvent) {
     if (this.gameOver && e.code === 'Space') {
+      e.preventDefault();
       this.reset();
       return;
     }
 
     switch (e.key) {
       case 'ArrowUp':
+        e.preventDefault();
         this.snake.setDirection(0, -1);
         break;
       case 'ArrowDown':
+        e.preventDefault();
         this.snake.setDirection(0, 1);
         break;
       case 'ArrowLeft':
+        e.preventDefault();
         this.snake.setDirection(-1, 0);
         break;
       case 'ArrowRight':
+        e.preventDefault();
         this.snake.setDirection(1, 0);
         break;
     }

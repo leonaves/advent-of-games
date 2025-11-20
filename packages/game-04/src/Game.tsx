@@ -324,15 +324,19 @@ export function Game({ seed, onComplete }: GameProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       switch (e.key) {
         case 'ArrowUp':
+          e.preventDefault();
           handleMove('up');
           break;
         case 'ArrowDown':
+          e.preventDefault();
           handleMove('down');
           break;
         case 'ArrowLeft':
+          e.preventDefault();
           handleMove('left');
           break;
         case 'ArrowRight':
+          e.preventDefault();
           handleMove('right');
           break;
       }
