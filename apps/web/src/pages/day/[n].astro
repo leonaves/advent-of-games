@@ -1,0 +1,52 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Game as Day1 } from '@games/game-01';
+import { Game as Day2 } from '@games/game-02';
+import { Game as Day3 } from '@games/game-03';
+
+export function getStaticPaths() {
+  return [{ params: { n: '1' } }, { params: { n: '2' } }, { params: { n: '3' } }];
+}
+
+const { n } = Astro.params;
+const dayNumber = parseInt(n || '1');
+
+const gameTitles: Record<number, string> = {
+  1: 'Snakle',
+  2: 'Hay Girl',
+  3: 'Nomoji',
+};
+
+const gameTitle = gameTitles[dayNumber] || `Game ${dayNumber}`;
+---
+
+<Layout title={`Day ${dayNumber} - ${gameTitle}`}>
+  <main class="min-h-screen bg-gradient-to-b from-gray-900 to-black p-8 text-white">
+    <div class="mx-auto max-w-6xl">
+      <div class="mb-8 flex items-center justify-between">
+        <h1
+          class="bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-6xl font-bold text-transparent"
+        >
+          {gameTitle.toUpperCase()}
+        </h1>
+        <a
+          href="/"
+          class="font-display border-2 border-white/30 bg-white/10 px-6 py-3 text-sm uppercase tracking-widest transition-all hover:border-white hover:bg-white/20"
+        >
+          ← Back
+        </a>
+      </div>
+
+      <div class="flex justify-center">
+        {dayNumber === 1 && <Day1 client:load />}
+        {dayNumber === 2 && <Day2 client:load />}
+        {dayNumber === 3 && <Day3 client:load />}
+      </div>
+
+      <div class="mt-8 text-center text-gray-400">
+        <p class="mb-2">Use Arrow Keys to Move</p>
+        <p>Eat Food to Grow • Avoid Obstacles • Find Powerups</p>
+      </div>
+    </div>
+  </main>
+</Layout>

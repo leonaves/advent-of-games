@@ -1,0 +1,99 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const games = [
+  {
+    day: 1,
+    title: 'Snakle',
+    description:
+      'A cyberpunk twist on the classic Snake game. Eat, grow, and phase through walls with powerups!',
+    isUnlocked: true,
+  },
+  {
+    day: 2,
+    title: 'Hay Girl',
+    description:
+      'Make hay while the sun shines! Cover your hay before bad weather destroys it in this resource management game.',
+    isUnlocked: true,
+  },
+  {
+    day: 3,
+    title: 'Nomoji',
+    description:
+      'Watch carefully as 50 emojis float around. Can you spot which one is missing? You have 2 guesses!',
+    isUnlocked: true,
+  },
+];
+---
+
+<Layout title="Advent of Games">
+  <main class="container relative z-10 mx-auto px-4 py-12">
+    <header class="relative mb-16 text-center">
+      <div
+        class="bg-neon-blue/20 pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[200px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
+      >
+      </div>
+      <h1
+        class="font-display to-neon-blue mb-6 bg-gradient-to-b from-white bg-clip-text text-4xl uppercase leading-relaxed tracking-widest text-transparent drop-shadow-[0_0_15px_rgba(0,243,255,0.6)] md:text-6xl"
+      >
+        Advent of Games
+      </h1>
+      <p class="mx-auto mb-12 max-w-2xl font-sans text-2xl tracking-wide text-blue-100">
+        > Daily coding challenges and games._
+      </p>
+    </header>
+
+    <div class="mx-auto max-w-5xl space-y-8">
+      {
+        games.map((game) => (
+          <div class="group flex flex-col gap-8 md:flex-row">
+            <div class="flex flex-shrink-0 items-center justify-center gap-2 pt-6 md:w-24 md:flex-col md:items-end md:justify-start">
+              <span class="font-display text-neon-blue text-2xl drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">
+                Day {game.day}
+              </span>
+            </div>
+
+            <div class="group/card relative flex-grow">
+              <div
+                class={`from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r via-purple-500 opacity-60 blur-sm transition-all duration-500 ${game.isUnlocked ? 'group-hover/card:opacity-100 group-hover/card:blur-md' : 'opacity-20'}`}
+              />
+
+              <div
+                class={`relative h-full border-2 border-white/10 bg-black/80 p-8 backdrop-blur-xl transition-all duration-500 ${game.isUnlocked ? 'group-hover/card:border-white/30 group-hover/card:bg-black/60' : 'opacity-80 grayscale'}`}
+              >
+                {!game.isUnlocked && (
+                  <div class="absolute inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-[2px]">
+                    <div class="flex flex-col items-center gap-4">
+                      <span class="animate-pulse text-4xl">🔒</span>
+                      <span class="font-display text-neon-pink text-lg tracking-widest">
+                        LOCKED
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div class="flex flex-col items-center text-center">
+                  <h3 class="font-display mb-4 text-2xl leading-snug tracking-wide text-white">
+                    {game.title}
+                  </h3>
+                  <p class="mb-8 max-w-lg font-sans text-xl leading-relaxed text-blue-100/80">
+                    {game.description}
+                  </p>
+
+                  {game.isUnlocked && (
+                    <a
+                      href={`/day/${game.day}`}
+                      class="hover:bg-neon-blue font-display border-2 border-transparent bg-white px-6 py-4 text-xs uppercase tracking-widest text-black shadow-[4px_4px_0px_rgba(0,243,255,0.4)] transition-all hover:-translate-y-1 hover:border-black hover:shadow-[6px_6px_0px_rgba(0,243,255,0.6)]"
+                    >
+                      Play Game
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </main>
+</Layout>
