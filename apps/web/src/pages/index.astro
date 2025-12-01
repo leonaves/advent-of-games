@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import manifest from '../games-manifest.json';
 
-const games = manifest.games;
+const year = manifest.year;
 ---
 
 <Layout title="Advent of Games">
@@ -22,57 +22,208 @@ const games = manifest.games;
       </p>
     </header>
 
-    <div class="mx-auto max-w-5xl space-y-8">
-      {
-        games.map((game) => (
-          <div class="group flex flex-col gap-8 md:flex-row">
-            <div class="flex flex-shrink-0 items-center justify-center gap-2 pt-6 md:w-24 md:flex-col md:items-end md:justify-start">
-              <span class="font-display text-neon-blue text-2xl drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">
-                Day {game.day}
-              </span>
-            </div>
+    <div class="mx-auto max-w-5xl space-y-8" id="games-container">
+      <!-- Games will be rendered here by client-side JS -->
+    </div>
+  </main>
 
-            <div class="group/card relative flex-grow">
-              <div
-                class={`from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r via-purple-500 opacity-60 blur-sm transition-all duration-500 ${game.isUnlocked ? 'group-hover/card:opacity-100 group-hover/card:blur-md' : 'opacity-20'}`}
-              />
+  <script define:vars={{ manifest, year }}>
+    function getCurrentDay() {
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth() + 1;
+      const currentDate = now.getDate();
 
-              <div
-                class={`relative h-full border-2 border-white/10 bg-black/80 p-8 backdrop-blur-xl transition-all duration-500 ${game.isUnlocked ? 'group-hover/card:border-white/30 group-hover/card:bg-black/60' : 'opacity-80 grayscale'}`}
-              >
-                {!game.isUnlocked && (
-                  <div class="absolute inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-[2px]">
-                    <div class="flex flex-col items-center gap-4">
-                      <span class="animate-pulse text-4xl">🔒</span>
-                      <span class="font-display text-neon-pink text-lg tracking-widest">
-                        LOCKED
-                      </span>
-                    </div>
-                  </div>
-                )}
+      if (currentYear === year && currentMonth === 12) {
+        return Math.min(currentDate, 25);
+      }
 
-                <div class="flex flex-col items-center text-center">
-                  <h3 class="font-display mb-4 text-2xl leading-snug tracking-wide text-white">
-                    {game.title}
-                  </h3>
-                  <p class="mb-8 max-w-lg font-sans text-xl leading-relaxed text-blue-100/80">
-                    {game.description}
-                  </p>
+      if (
+        currentYear > year ||
+        (currentYear === year && currentMonth > 12)
+      ) {
+        return 25;
+      }
 
-                  {game.isUnlocked && (
+      return 0;
+    }
+
+    function getTimeUntilUnlock(day) {
+      const unlockDate = new Date(`${year}-12-${String(day).padStart(2, '0')}T00:00:00`);
+      const now = new Date();
+      const diff = unlockDate - now;
+
+      if (diff <= 0) return null;
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      return { hours, minutes, seconds, total: diff };
+    }
+
+    function formatDate(day) {
+      const date = new Date(`${year}-12-${String(day).padStart(2, '0')}`);
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+    }
+
+    function renderGames() {
+      const container = document.getElementById('games-container');
+      if (!container) return;
+
+      const currentDay = getCurrentDay();
+      const gamesByDay = {};
+
+      manifest.games.forEach((game) => {
+        gamesByDay[game.day] = game;
+      });
+
+      let html = '';
+
+      for (let day = 1; day <= currentDay; day++) {
+        const game = gamesByDay[day];
+        const dateStr = formatDate(day);
+
+        if (game) {
+          html += `
+            <div class="group flex flex-col gap-8 md:flex-row">
+              <div class="flex flex-shrink-0 items-center justify-center gap-2 pt-6 md:w-24 md:flex-col md:items-end md:justify-start">
+                <span class="font-display text-neon-blue text-2xl drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">
+                  Day ${day}
+                </span>
+                <span class="text-sm text-blue-300/60">${dateStr}</span>
+              </div>
+
+              <div class="group/card relative flex-grow">
+                <div
+                  class="from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r via-purple-500 opacity-60 blur-sm transition-all duration-500 group-hover/card:opacity-100 group-hover/card:blur-md"
+                ></div>
+
+                <div
+                  class="relative h-full border-2 border-white/10 bg-black/80 p-8 backdrop-blur-xl transition-all duration-500 group-hover/card:border-white/30 group-hover/card:bg-black/60"
+                >
+                  <div class="flex flex-col items-center text-center">
+                    <h3 class="font-display mb-4 text-2xl leading-snug tracking-wide text-white">
+                      ${game.title}
+                    </h3>
+                    <p class="mb-8 max-w-lg font-sans text-xl leading-relaxed text-blue-100/80">
+                      ${game.description}
+                    </p>
+
                     <a
-                      href={`/day/${game.day}`}
+                      href="/day/${game.day}"
                       class="hover:bg-neon-blue font-display border-2 border-transparent bg-white px-6 py-4 text-xs uppercase tracking-widest text-black shadow-[4px_4px_0px_rgba(0,243,255,0.4)] transition-all hover:-translate-y-1 hover:border-black hover:shadow-[6px_6px_0px_rgba(0,243,255,0.6)]"
                     >
                       Play Game
                     </a>
-                  )}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))
+          `;
+        } else {
+          html += `
+            <div class="group flex flex-col gap-8 md:flex-row">
+              <div class="flex flex-shrink-0 items-center justify-center gap-2 pt-6 md:w-24 md:flex-col md:items-end md:justify-start">
+                <span class="font-display text-neon-blue text-2xl drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">
+                  Day ${day}
+                </span>
+                <span class="text-sm text-blue-300/60">${dateStr}</span>
+              </div>
+
+              <div class="group/card relative flex-grow">
+                <div
+                  class="from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r via-purple-500 opacity-30 blur-sm"
+                ></div>
+
+                <div
+                  class="relative h-full border-2 border-white/10 bg-black/80 p-8 backdrop-blur-xl opacity-60"
+                >
+                  <div class="flex flex-col items-center text-center">
+                    <span class="text-4xl mb-4">⏳</span>
+                    <h3 class="font-display mb-4 text-2xl leading-snug tracking-wide text-white">
+                      Coming Soon
+                    </h3>
+                    <p class="max-w-lg font-sans text-lg leading-relaxed text-blue-100/60">
+                      This game is still being prepared...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
       }
-    </div>
-  </main>
+
+      if (currentDay < 25) {
+        const nextDay = currentDay + 1;
+        const timeUntil = getTimeUntilUnlock(nextDay);
+        const dateStr = formatDate(nextDay);
+
+        if (timeUntil) {
+          html += `
+            <div class="group flex flex-col gap-8 md:flex-row">
+              <div class="flex flex-shrink-0 items-center justify-center gap-2 pt-6 md:w-24 md:flex-col md:items-end md:justify-start">
+                <span class="font-display text-neon-purple text-2xl drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]">
+                  Day ${nextDay}
+                </span>
+                <span class="text-sm text-purple-300/60">${dateStr}</span>
+              </div>
+
+              <div class="group/card relative flex-grow">
+                <div
+                  class="from-neon-purple to-neon-pink absolute -inset-[4px] animate-pulse bg-gradient-to-r opacity-40 blur-sm"
+                ></div>
+
+                <div
+                  class="relative h-full border-2 border-purple-500/20 bg-black/90 p-8 backdrop-blur-xl overflow-hidden"
+                >
+                  <div class="absolute inset-0 backdrop-blur-[8px] bg-black/40"></div>
+
+                  <div class="relative flex flex-col items-center text-center">
+                    <div class="text-6xl mb-4 blur-md select-none">🎮</div>
+                    <h3 class="font-display mb-4 text-2xl leading-snug tracking-wide text-white/40 blur-sm">
+                      Next Game
+                    </h3>
+                    <p class="mb-6 max-w-lg font-sans text-lg leading-relaxed text-purple-100/60">
+                      Unlocks in
+                    </p>
+
+                    <div class="font-display text-3xl text-neon-purple drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" id="countdown-${nextDay}">
+                      ${String(timeUntil.hours).padStart(2, '0')}:${String(timeUntil.minutes).padStart(2, '0')}:${String(timeUntil.seconds).padStart(2, '0')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      container.innerHTML = html;
+
+      if (currentDay < 25) {
+        const nextDay = currentDay + 1;
+        const countdownEl = document.getElementById(`countdown-${nextDay}`);
+
+        if (countdownEl) {
+          setInterval(() => {
+            const timeUntil = getTimeUntilUnlock(nextDay);
+            if (timeUntil) {
+              countdownEl.textContent =
+                `${String(timeUntil.hours).padStart(2, '0')}:${String(timeUntil.minutes).padStart(2, '0')}:${String(timeUntil.seconds).padStart(2, '0')}`;
+            } else {
+              window.location.reload();
+            }
+          }, 1000);
+        }
+      }
+    }
+
+    renderGames();
+    setInterval(renderGames, 60000);
+  </script>
 </Layout>

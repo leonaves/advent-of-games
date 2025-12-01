@@ -1,10 +1,11 @@
 {
+  "year": 2025,
   "games": [
     {
       "day": 1,
+      "date": "2025-12-01",
       "title": "Mastermind",
       "description": "Crack the secret 4-color code in 10 tries or less! Use logic and deduction to solve the puzzle.",
-      "isUnlocked": true,
       "repo": "https://github.com/herunan/mastermind",
       "branch": "master",
       "buildConfig": {
