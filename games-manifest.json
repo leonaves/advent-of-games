@@ -15,6 +15,21 @@
         "buildOutputDir": "dist",
         "nodeVersion": "20"
       }
+    },
+    {
+      "day": 2,
+      "date": "2025-12-02",
+      "title": "Froggle",
+      "description": "Guide your frog across busy roads and treacherous rivers! Jump on logs and turtles, but watch out for cars!",
+      "repo": "https://github.com/herunan/froggle",
+      "branch": "main",
+      "buildConfig": {
+        "packageManager": "npm",
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "buildOutputDir": "dist",
+        "nodeVersion": "20"
+      }
     }
   ]
 }
