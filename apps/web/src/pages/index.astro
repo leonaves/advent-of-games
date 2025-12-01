@@ -1,43 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import manifest from '../games-manifest.json';
 
-const games = [
-  {
-    day: 1,
-    title: 'Snakle',
-    description:
-      'A cyberpunk twist on the classic Snake game. Eat, grow, and phase through walls with powerups!',
-    isUnlocked: true,
-  },
-  {
-    day: 2,
-    title: 'Hay Girl',
-    description:
-      'Make hay while the sun shines! Cover your hay before bad weather destroys it in this resource management game.',
-    isUnlocked: true,
-  },
-  {
-    day: 3,
-    title: 'Nomoji',
-    description:
-      'Watch carefully as 50 emojis float around. Can you spot which one is missing? You have 2 guesses!',
-    isUnlocked: true,
-  },
-  {
-    day: 4,
-    title: 'Froggle',
-    description:
-      'Guide your frog across busy roads and treacherous rivers! Jump on logs and turtles, but watch out for cars!',
-    isUnlocked: true,
-  },
-  {
-    day: 5,
-    title: 'Mastermind',
-    description:
-      'Crack the secret 4-color code in 10 tries or less! Use logic and deduction to solve the puzzle.',
-    isUnlocked: true,
-  },
-];
+const games = manifest.games;
 ---
 
 <Layout title="Advent of Games">

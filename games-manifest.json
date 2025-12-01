@@ -1,0 +1,19 @@
+{
+  "games": [
+    {
+      "day": 1,
+      "title": "Mastermind",
+      "description": "Crack the secret 4-color code in 10 tries or less! Use logic and deduction to solve the puzzle.",
+      "isUnlocked": true,
+      "repo": "https://github.com/herunan/mastermind",
+      "branch": "master",
+      "buildConfig": {
+        "packageManager": "npm",
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "buildOutputDir": "dist",
+        "nodeVersion": "20"
+      }
+    }
+  ]
+}

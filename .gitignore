@@ -6,3 +6,6 @@ dist
 .vite
 .env
 .env.local
+.temp-games
+apps/web/src/games-manifest.json
+apps/web/public/games

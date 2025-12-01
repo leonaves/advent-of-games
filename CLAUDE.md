@@ -1,381 +1,252 @@
 # Claude Development Guide
 
-This document describes the architecture, conventions, and development patterns for the Advent of Games monorepo.
+This document describes the architecture, conventions, and development patterns for the Advent of Games project.
 
 ## Architecture Overview
 
-This is a **PNPM workspace monorepo** with the following structure:
+This project uses a **manifest-based build pipeline** that pulls games from external GitHub repositories, builds them, and integrates them into an Astro site via iframes.
 
-- **apps/web**: Astro site that serves as the main frontend
-- **packages/game-XX**: Individual game packages (React components)
-- **packages/ui**: Shared design system and Tailwind configuration
+### Project Structure
 
-## How Games Work
+- **apps/web**: Astro site serving as the main frontend
+- **games-manifest.json**: Central configuration for all games
+- **scripts/build-games.js**: Build pipeline that clones and builds game repos
+- **apps/web/public/games/**: Build output directory (gitignored)
 
-### Game Component API
+## How the Build Pipeline Works
 
-Every game is a standalone React component that exports a `Game` function with this interface:
+### 1. Games Manifest (`games-manifest.json`)
 
-```tsx
-export interface GameProps {
-  seed?: number;
-  onComplete?: (score: number) => void;
+The manifest is the single source of truth for all games:
+
+```json
+{
+  "games": [
+    {
+      "day": 1,
+      "title": "Mastermind",
+      "description": "Game description here",
+      "isUnlocked": true,
+      "repo": "https://github.com/user/repo",
+      "branch": "master",
+      "buildConfig": {
+        "packageManager": "npm",
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "buildOutputDir": "dist",
+        "nodeVersion": "20"
+      }
+    }
+  ]
 }
+```
 
-export function Game({ seed, onComplete }: GameProps) {
-  // Game implementation
+### 2. Build Pipeline (`scripts/build-games.js`)
+
+The build script:
+1. Reads `games-manifest.json`
+2. Copies manifest to `apps/web/src/` for Astro to import
+3. For each game:
+   - Clones the repo to `.temp-games/day-{N}/`
+   - Runs install command
+   - Runs build command
+   - Copies build output to `apps/web/public/games/day-{N}/`
+4. Cleans up temp files
+
+### 3. Astro Integration
+
+Games are embedded in iframes for complete style isolation:
+
+**`apps/web/src/pages/day/[n].astro`:**
+- Dynamically generates routes based on manifest
+- Wraps each game in an iframe
+- Loads from `/games/day-{N}/index.html`
+
+**`apps/web/src/pages/index.astro`:**
+- Reads manifest to display game list
+- Shows title, description, and unlock status
+
+## Adding a New Game
+
+### Step 1: Add to Manifest
+
+Edit `games-manifest.json`:
+
+```json
+{
+  "day": 2,
+  "title": "Your Game Name",
+  "description": "Brief description of the game",
+  "isUnlocked": true,
+  "repo": "https://github.com/username/repo-name",
+  "branch": "main",
+  "buildConfig": {
+    "packageManager": "npm",
+    "installCommand": "npm install",
+    "buildCommand": "npm run build",
+    "buildOutputDir": "dist",
+    "nodeVersion": "20"
+  }
 }
 ```
 
-**Props:**
+### Step 2: Build
 
-- `seed`: Optional random seed for deterministic gameplay
-- `onComplete`: Callback fired when game ends, receives final score
-
-### Game Package Structure
-
-```
-packages/game-XX/
-├── src/
-│   ├── Game.tsx        # Main game component (exported)
-│   ├── main.tsx        # Vite dev harness entry point
-│   └── index.css       # Styles for dev harness
-├── index.html          # Dev harness HTML
-├── vite.config.ts      # Vite configuration
-├── package.json        # Package metadata and scripts
-└── tsconfig.json       # TypeScript configuration
+```bash
+pnpm run build:games  # Build just the games
+pnpm build            # Build games + Astro site
 ```
 
-### Creating a New Game
+### Step 3: Deploy
 
-1. **Create the package directory:**
+```bash
+pnpm deploy  # Builds everything and deploys to Cloudflare Pages
+```
 
-   ```bash
-   mkdir -p packages/game-XX/src
-   ```
+## Requirements for Game Repositories
 
-2. **Copy `package.json` from an existing game** and update:
-   - `name`: `@games/game-XX`
-   - `port` in `vite.config.ts`: `300X`
+Each game repository must have:
 
-3. **Implement `src/Game.tsx`:**
-
-   ```tsx
-   import { useState, useEffect } from 'react';
-
-   export interface GameProps {
-     seed?: number;
-     onComplete?: (score: number) => void;
-   }
-
-   export function Game({ seed, onComplete }: GameProps) {
-     // Your game logic here
-
-     // When game ends:
-     useEffect(() => {
-       if (isGameOver && onComplete) {
-         onComplete(finalScore);
-       }
-     }, [isGameOver, finalScore, onComplete]);
-
-     return <div className="game-container">{/* JSX */}</div>;
-   }
-   ```
-
-4. **Create dev harness** (`src/main.tsx`, `index.html`, `vite.config.ts`)
-   - Copy from existing game packages
-   - Update port number in `vite.config.ts`
-
-5. **Integrate into Astro site:**
-
-   Update `apps/web/package.json`:
-
+1. **`package.json` with build script:**
    ```json
    {
-     "dependencies": {
-       "@games/game-XX": "workspace:*"
+     "scripts": {
+       "build": "vite build"  // or your build command
      }
    }
    ```
 
-   Update `apps/web/src/pages/day/[n].astro`:
+2. **Static build output:**
+   - All files in a single directory (usually `dist/`)
+   - Entry point at `index.html`
+   - All assets bundled (no external dependencies)
 
-   ```astro
-   ---
-   import { Game as DayX } from '@games/game-XX';
+3. **Self-contained:**
+   - No server-side code
+   - No API dependencies
+   - Works from any path (relative asset paths)
 
-   export function getStaticPaths() {
-     return [
-       // existing routes...
-       { params: { n: 'X' } },
-     ];
-   }
-
-   const gameTitles: Record<number, string> = {
-     // existing titles...
-     X: 'Your Game Title',
-   };
-   ---
-
-   <Layout title={`Day ${dayNumber} - ${gameTitle}`}>
-     <div class="flex justify-center">
-       {dayNumber === X && <DayX client:load />}
-     </div>
-   </Layout>
-   ```
-
-   Update `apps/web/src/pages/index.astro` to add game to list.
-
-6. **Test both modes:**
-
-   ```bash
-   # Standalone mode
-   pnpm --filter @games/game-XX dev
-
-   # Integrated mode
-   pnpm dev
-   ```
-
-## Design System
-
-### Using the UI Package
-
-The `@advent/ui` package provides:
-
-#### Tailwind Configuration
-
-Import in your `tailwind.config.mjs`:
-
-```js
-import uiConfig from '@advent/ui/tailwind-config';
-
-export default uiConfig;
-```
-
-Or extend it:
-
-```js
-import uiConfig from '@advent/ui/tailwind-config';
-
-export default {
-  ...uiConfig,
-  theme: {
-    extend: {
-      ...uiConfig.theme.extend,
-      // Your custom extensions
-    },
-  },
-};
-```
-
-#### Global Styles
-
-Import in your main layout or component:
-
-```tsx
-import '@advent/ui/styles';
-```
-
-This provides:
-
-- Tailwind base styles
-- CSS custom properties for colors
-- Star animation background
-
-#### Theme Colors
-
-**Neon Palette (Primary):**
-
-- `text-neon-blue` / `bg-neon-blue`: #00F3FF (cyan)
-- `text-neon-pink` / `bg-neon-pink`: #FF003C (hot pink)
-- `text-neon-purple` / `bg-neon-purple`: #BC13FE (violet)
-- `text-neon-green` / `bg-neon-green`: #00FF9D (mint)
-
-**Christmas Palette (Secondary):**
-
-- `text-christmas-red` / `bg-christmas-red`: #FF003C
-- `text-christmas-green` / `bg-christmas-green`: #00F3FF
-- `text-christmas-gold` / `bg-christmas-gold`: #F8B229
-- `text-christmas-midnight` / `bg-christmas-midnight`: #050B14
-
-**Glass/Transparency:**
-
-- `border-glass-border`: rgba(255, 255, 255, 0.1)
-- `bg-glass-surface`: rgba(255, 255, 255, 0.05)
-- `bg-glass-highlight`: rgba(255, 255, 255, 0.2)
-
-### Design Patterns
-
-#### Glassmorphism Cards
-
-```tsx
-<div className="relative">
-  {/* Glow effect */}
-  <div className="from-neon-blue via-neon-purple to-neon-pink absolute -inset-[4px] bg-gradient-to-r opacity-60 blur-sm" />
-
-  {/* Card */}
-  <div className="relative border-2 border-white/10 bg-black/80 p-8 backdrop-blur-xl">Content</div>
-</div>
-```
-
-#### Neon Buttons
-
-```tsx
-<button className="bg-neon-blue hover:bg-neon-green transform rounded-lg border-4 border-white/30 px-8 py-4 font-bold text-black shadow-[0_0_20px_rgba(0,243,255,0.5)] transition-all hover:scale-105">
-  Click Me
-</button>
-```
-
-#### Gradient Text
-
-```tsx
-<h1 className="from-neon-green to-neon-blue bg-gradient-to-r bg-clip-text text-5xl font-bold text-transparent">
-  Title
-</h1>
-```
+4. **Framework agnostic:**
+   - Can be React, Vue, Svelte, vanilla JS, etc.
+   - Just needs to build to static HTML/CSS/JS
 
 ## Development Workflow
 
-### Scripts
+### Commands
 
-**Root level:**
-
-- `pnpm dev` - Run main Astro site
-- `pnpm build` - Build all packages
-- `pnpm lint` - Lint all packages
-- `pnpm lint:fix` - Auto-fix linting issues
-- `pnpm format` - Format with Prettier
-- `pnpm format:check` - Check Prettier formatting
-- `pnpm typecheck` - Type-check all packages
-
-**Per-package:**
-
-- `pnpm --filter @games/game-XX dev` - Run game standalone
-- `pnpm --filter @games/game-XX build` - Build game
-- `pnpm --filter @games/game-XX lint` - Lint game
-- `pnpm --filter @games/game-XX typecheck` - Type-check game
-
-### Code Quality
-
-**ESLint** checks TypeScript/React code:
-
-- No unused variables (warnings)
-- React hooks rules
-- TypeScript-aware
-
-**Prettier** formats:
-
-- JavaScript/TypeScript
-- Astro files (via plugin)
-- Tailwind class ordering (via plugin)
-- JSON, Markdown, CSS
-
-**Stylelint** checks CSS:
-
-- Standard CSS rules
-- Tailwind directives allowed
-
-**TypeScript** checks:
-
-- Strict mode enabled
-- Type safety across all packages
-
-### State Management
-
-Games can use **Zustand** for state management:
-
+**Development:**
 ```bash
-pnpm add zustand --filter @games/game-XX
+pnpm dev                # Start Astro dev server (port 4321)
+pnpm run build:games    # Build games only
 ```
 
-Example:
+**Build & Deploy:**
+```bash
+pnpm build             # Build games + Astro site
+pnpm deploy            # Build and deploy to Cloudflare Pages
+```
 
-```tsx
-import { create } from 'zustand';
+**Code Quality:**
+```bash
+pnpm lint              # Lint all packages
+pnpm lint:fix          # Auto-fix linting issues
+pnpm format            # Format with Prettier
+pnpm format:check      # Check Prettier formatting
+pnpm typecheck         # Type-check all packages
+```
 
-interface GameState {
-  score: number;
-  isPlaying: boolean;
-  incrementScore: () => void;
-}
+### Testing Games Locally
 
-const useGameStore = create<GameState>((set) => ({
-  score: 0,
-  isPlaying: false,
-  incrementScore: () => set((state) => ({ score: state.score + 1 })),
-}));
+After running `pnpm run build:games`, you can test games:
 
-export function Game() {
-  const { score, incrementScore } = useGameStore();
-  return <button onClick={incrementScore}>Score: {score}</button>;
-}
+1. **In development mode:**
+   ```bash
+   pnpm dev
+   # Visit http://localhost:4321
+   ```
+
+2. **Standalone game build:**
+   - Check `apps/web/public/games/day-{N}/index.html`
+   - Open directly in browser to test game isolation
+
+## Design System
+
+The project uses a neon cyberpunk aesthetic. See the Astro layout files for the design system:
+
+- **Colors:** Neon blue, pink, purple, green gradients
+- **Effects:** Glassmorphism, glows, blurs
+- **Typography:** Gradient text, wide tracking
+
+Games don't need to follow this design - they're fully isolated in iframes.
+
+## File Structure
+
+```
+advent-of-games/
+├── games-manifest.json           # Central game configuration
+├── scripts/
+│   └── build-games.js           # Build pipeline
+├── apps/
+│   └── web/
+│       ├── src/
+│       │   ├── pages/
+│       │   │   ├── index.astro       # Game list
+│       │   │   └── day/[n].astro     # Game wrapper
+│       │   ├── layouts/
+│       │   │   └── Layout.astro      # Main layout
+│       │   └── games-manifest.json   # (Generated, gitignored)
+│       └── public/
+│           └── games/               # (Generated, gitignored)
+│               └── day-{N}/         # Built game files
+└── .temp-games/                     # (Temporary, gitignored)
 ```
 
 ## Deployment
 
-### Build Process
+The project deploys to **Cloudflare Pages** via Wrangler:
 
-```bash
-pnpm build
-```
+1. `pnpm build` runs:
+   - `node scripts/build-games.js` (builds all games)
+   - `pnpm --filter web build` (builds Astro site)
 
-This runs build in all packages:
+2. `pnpm deploy` runs:
+   - `pnpm build` (above)
+   - `wrangler pages deploy` (deploys to Cloudflare)
 
-1. Games are built with Vite (for dev harness)
-2. Astro site is built with all games as islands
-
-### Astro Islands
-
-Games are rendered as React islands using `client:load`:
-
-```astro
-<Day1 client:load />
-```
-
-This means:
-
-- Game JS is code-split automatically
-- Game only hydrates when loaded
-- Each game is an independent bundle
-
-## Best Practices
-
-1. **Keep games self-contained**: No external API calls, all logic client-side
-2. **Use TypeScript**: Strong typing prevents bugs
-3. **Follow design system**: Use provided colors and patterns
-4. **Optimize performance**: Games should run at 60fps
-5. **Test both modes**: Standalone dev harness AND Astro integration
-6. **Clean up effects**: Always return cleanup functions from useEffect
-7. **Handle edge cases**: Game over, pause, reset states
-8. **Responsive design**: Games should work on different screen sizes (where applicable)
+Output directory: `apps/web/dist/`
 
 ## Troubleshooting
 
-### Game not showing in Astro
+### Game fails to build
 
-1. Check `apps/web/package.json` has dependency
-2. Run `pnpm install` at root
-3. Check import in `day/[n].astro`
-4. Check getStaticPaths includes your day number
-5. Check conditional render: `{dayNumber === X && <DayX client:load />}`
+1. Check the repo URL and branch in manifest
+2. Verify the game repo has a working build script
+3. Check the `buildOutputDir` matches the game's output
+4. Look at build logs for specific errors
 
-### Type errors
+### Game doesn't display
 
-1. Run `pnpm typecheck` to see all errors
-2. Ensure `@types/node` is in devDependencies
-3. Check tsconfig.json extends base config
-4. For React types: `@types/react` and `@types/react-dom`
+1. Verify game built successfully in `apps/web/public/games/day-{N}/`
+2. Check browser console for iframe errors
+3. Ensure `index.html` exists in game directory
+4. Check for CORS or CSP issues
 
-### Build failures
+### Manifest not found during build
 
-1. Check all packages build individually
-2. Run `pnpm --filter @games/game-XX build`
-3. Check for import errors in Astro pages
-4. Clear `.astro` and `dist` folders
+Run `pnpm run build:games` before `pnpm --filter web build`.
+The full `pnpm build` command does this automatically.
 
-### Linting issues
+## Best Practices
 
-1. Run `pnpm lint` to see all issues
-2. Run `pnpm lint:fix` to auto-fix
-3. Run `pnpm format` for Prettier issues
-4. Check eslint.config.mjs for custom rules
+1. **Keep manifest organized:** Add games in order by day number
+2. **Test before committing:** Run `pnpm build` to ensure everything works
+3. **Document special requirements:** Note any unusual build configs in the manifest
+4. **Version control:** Only commit `games-manifest.json`, not built games
+5. **Clean builds:** Delete `.temp-games/` if you encounter issues
+
+## Example Game Repos
+
+- **Mastermind:** https://github.com/herunan/mastermind
+  - React + Vite + Tailwind
+  - Standard build process
+  - Good reference for new games
