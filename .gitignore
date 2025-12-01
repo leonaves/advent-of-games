@@ -9,3 +9,4 @@ dist
 .temp-games
 apps/web/src/games-manifest.json
 apps/web/public/games
+.claude/settings.local.json
