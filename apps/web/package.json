@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@advent/ui": "workspace:*",
-    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/cloudflare": "^11.2.0",
     "@astrojs/react": "^3.0.0",
     "@astrojs/tailwind": "^5.1.0",
     "@games/game-01": "workspace:*",
