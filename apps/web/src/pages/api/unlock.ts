@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 
+export const prerender = false;
+
 const UNLOCK_PASSWORD = import.meta.env.UNLOCK_PASSWORD || 'snowflake2025';
 
 export const POST: APIRoute = async ({ request }) => {
