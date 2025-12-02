@@ -26,26 +26,49 @@ const year = manifest.year;
     </div>
 
     <!-- Modal -->
-    <div id="game-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div
+      id="game-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+    >
       <div class="relative w-full max-w-2xl">
-        <div class="from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r opacity-60 blur-sm"></div>
+        <div
+          class="from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r opacity-60 blur-sm"
+        >
+        </div>
         <div class="relative border-2 border-white/20 bg-black/95 backdrop-blur-xl">
           <div class="p-6 md:p-8">
             <div class="mb-6 flex items-start justify-between">
               <div>
-                <div class="font-display text-xs text-neon-blue mb-2" id="modal-date"></div>
-                <h2 class="font-display text-2xl md:text-3xl text-white mb-2" id="modal-title"></h2>
+                <div class="font-display text-neon-blue mb-2 text-xs" id="modal-date"></div>
+                <h2 class="font-display mb-2 text-2xl text-white md:text-3xl" id="modal-title"></h2>
               </div>
-              <button id="close-modal" class="text-white/60 hover:text-white transition-colors text-2xl leading-none">×</button>
+              <button
+                id="close-modal"
+                class="text-2xl leading-none text-white/60 transition-colors hover:text-white"
+                >×</button
+              >
             </div>
 
             <div class="mb-6">
-              <img id="modal-thumbnail" src="" alt="" class="w-full aspect-square object-cover border-2 border-white/10" />
+              <img
+                id="modal-thumbnail"
+                src=""
+                alt=""
+                class="aspect-square w-full border-2 border-white/10 object-cover"
+              />
             </div>
 
-            <p class="text-blue-100/80 text-base md:text-lg mb-8 leading-relaxed" id="modal-description"></p>
+            <p
+              class="mb-8 text-base leading-relaxed text-blue-100/80 md:text-lg"
+              id="modal-description"
+            >
+            </p>
 
-            <a id="modal-play-btn" href="" class="font-display block w-full text-center border-2 border-transparent bg-white px-6 py-4 text-sm uppercase tracking-widest text-black shadow-[4px_4px_0px_rgba(0,243,255,0.4)] transition-all hover:-translate-y-1 hover:border-black hover:shadow-[6px_6px_0px_rgba(0,243,255,0.6)] hover:bg-neon-blue">
+            <a
+              id="modal-play-btn"
+              href=""
+              class="font-display hover:bg-neon-blue block w-full border-2 border-transparent bg-white px-6 py-4 text-center text-sm uppercase tracking-widest text-black shadow-[4px_4px_0px_rgba(0,243,255,0.4)] transition-all hover:-translate-y-1 hover:border-black hover:shadow-[6px_6px_0px_rgba(0,243,255,0.6)]"
+            >
               Play Game
             </a>
           </div>
@@ -65,10 +88,7 @@ const year = manifest.year;
         return Math.min(currentDate, 25);
       }
 
-      if (
-        currentYear > year ||
-        (currentYear === year && currentMonth > 12)
-      ) {
+      if (currentYear > year || (currentYear === year && currentMonth > 12)) {
         return 25;
       }
 
@@ -182,8 +202,7 @@ const year = manifest.year;
           setInterval(() => {
             const timeUntil = getTimeUntilUnlock(nextDay);
             if (timeUntil) {
-              countdownEl.textContent =
-                `${String(timeUntil.hours).padStart(2, '0')}:${String(timeUntil.minutes).padStart(2, '0')}:${String(timeUntil.seconds).padStart(2, '0')}`;
+              countdownEl.textContent = `${String(timeUntil.hours).padStart(2, '0')}:${String(timeUntil.minutes).padStart(2, '0')}:${String(timeUntil.seconds).padStart(2, '0')}`;
             } else {
               window.location.reload();
             }

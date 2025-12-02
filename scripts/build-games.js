@@ -72,19 +72,11 @@ async function buildGame(game) {
 
     // Install dependencies
     log(`\n📥 Installing dependencies...`, colors.cyan);
-    execCommand(
-      buildConfig.installCommand,
-      tempGameDir,
-      'Install dependencies'
-    );
+    execCommand(buildConfig.installCommand, tempGameDir, 'Install dependencies');
 
     // Build game
     log(`\n🔨 Building game...`, colors.cyan);
-    execCommand(
-      buildConfig.buildCommand,
-      tempGameDir,
-      'Build game'
-    );
+    execCommand(buildConfig.buildCommand, tempGameDir, 'Build game');
 
     // Copy build output
     log(`\n📤 Copying build output...`, colors.cyan);
@@ -117,7 +109,6 @@ async function buildGame(game) {
 
     log(`\n✓ Successfully built day ${day}: ${title}`, colors.green);
     log(`  Output: ${outputGameDir}`, colors.green);
-
   } catch (error) {
     log(`\n✗ Failed to build day ${day}: ${title}`, colors.red);
     log(`  Error: ${error.message}`, colors.red);

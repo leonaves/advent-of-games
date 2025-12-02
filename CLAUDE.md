@@ -44,6 +44,7 @@ The manifest is the single source of truth for all games:
 ### 2. Build Pipeline (`scripts/build-games.js`)
 
 The build script:
+
 1. Reads `games-manifest.json`
 2. Copies manifest to `apps/web/src/` for Astro to import
 3. For each game:
@@ -58,11 +59,13 @@ The build script:
 Games are embedded in iframes for complete style isolation:
 
 **`apps/web/src/pages/day/[n].astro`:**
+
 - Dynamically generates routes based on manifest
 - Wraps each game in an iframe
 - Loads from `/games/day-{N}/index.html`
 
 **`apps/web/src/pages/index.astro`:**
+
 - Reads manifest to display game list
 - Shows title, description, and unlock status
 
@@ -108,10 +111,11 @@ pnpm deploy  # Builds everything and deploys to Cloudflare Pages
 Each game repository must have:
 
 1. **`package.json` with build script:**
+
    ```json
    {
      "scripts": {
-       "build": "vite build"  // or your build command
+       "build": "vite build" // or your build command
      }
    }
    ```
@@ -135,18 +139,21 @@ Each game repository must have:
 ### Commands
 
 **Development:**
+
 ```bash
 pnpm dev                # Start Astro dev server (port 4321)
 pnpm run build:games    # Build games only
 ```
 
 **Build & Deploy:**
+
 ```bash
 pnpm build             # Build games + Astro site
 pnpm deploy            # Build and deploy to Cloudflare Pages
 ```
 
 **Code Quality:**
+
 ```bash
 pnpm lint              # Lint all packages
 pnpm lint:fix          # Auto-fix linting issues
@@ -160,6 +167,7 @@ pnpm typecheck         # Type-check all packages
 After running `pnpm run build:games`, you can test games:
 
 1. **In development mode:**
+
    ```bash
    pnpm dev
    # Visit http://localhost:4321
@@ -206,11 +214,13 @@ advent-of-games/
 The project deploys to **Cloudflare Pages** automatically via GitHub integration.
 
 **Preferred deployment method:**
+
 1. Commit your changes to git
 2. Push to the main branch on GitHub
 3. Cloudflare Pages automatically builds and deploys
 
 **Manual deployment (if needed):**
+
 1. `pnpm build` runs:
    - `node scripts/build-games.js` (builds all games)
    - `pnpm --filter web build` (builds Astro site)
