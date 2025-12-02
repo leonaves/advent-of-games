@@ -1,5 +1,6 @@
 {
   "year": 2025,
+  "baseUrl": "https://adventofgames.dev",
   "games": [
     {
       "day": 1,

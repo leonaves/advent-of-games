@@ -1,8 +1,37 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import manifest from '../games-manifest.json';
+import rawManifest from '../games-manifest.json';
 
-const year = manifest.year;
+const year = rawManifest.year;
+
+// Strip slugs from future games in static build
+function getCurrentDay(): number {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+  const currentDate = now.getDate();
+
+  if (currentYear === year && currentMonth === 12) {
+    return Math.min(currentDate, 25);
+  }
+  if (currentYear > year || (currentYear === year && currentMonth > 12)) {
+    return 25;
+  }
+  return 0;
+}
+
+const currentDay = getCurrentDay();
+const sanitizedManifest = {
+  ...rawManifest,
+  games: rawManifest.games.map((game) => {
+    if (game.day <= currentDay) {
+      return game;
+    }
+    // Strip slug from future games
+    const { slug, ...rest } = game;
+    return rest;
+  }),
+};
 ---
 
 <Layout title="Advent of Games">
@@ -75,9 +104,46 @@ const year = manifest.year;
         </div>
       </div>
     </div>
+
+    <!-- Unlock Modal -->
+    <div
+      id="unlock-modal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+    >
+      <div class="relative w-full max-w-sm">
+        <div
+          class="from-neon-purple to-neon-pink absolute -inset-[4px] bg-gradient-to-r opacity-40 blur-sm"
+        >
+        </div>
+        <div class="relative border-2 border-white/10 bg-black/95 backdrop-blur-xl">
+          <div class="p-6">
+            <button
+              id="close-unlock-modal"
+              class="absolute right-4 top-4 text-xl leading-none text-white/40 transition-colors hover:text-white"
+              >×</button
+            >
+            <form id="unlock-form" class="mt-4">
+              <input
+                type="password"
+                id="unlock-input"
+                class="w-full border-2 border-white/20 bg-black/50 px-4 py-3 text-center text-white placeholder-white/20 focus:border-white/40 focus:outline-none"
+                autocomplete="off"
+              />
+              <div id="unlock-error" class="mt-2 hidden text-center text-sm text-red-400"></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
-  <script define:vars={{ manifest, year }}>
+  <script define:vars={{ manifest: sanitizedManifest, year }}>
+    let currentManifest = manifest;
+    let lockedTapCount = 0;
+    let lastTapTime = 0;
+    const TAP_THRESHOLD = 10;
+    const TAP_TIMEOUT = 3000;
+
     function getCurrentDay() {
       const now = new Date();
       const currentYear = now.getFullYear();
@@ -93,6 +159,10 @@ const year = manifest.year;
       }
 
       return 0;
+    }
+
+    function isFullyUnlocked() {
+      return document.cookie.includes('advent_unlocked=true');
     }
 
     function getTimeUntilUnlock(day) {
@@ -117,14 +187,95 @@ const year = manifest.year;
       });
     }
 
+    function handleLockedTap() {
+      const now = Date.now();
+      if (now - lastTapTime > TAP_TIMEOUT) {
+        lockedTapCount = 0;
+      }
+      lastTapTime = now;
+      lockedTapCount++;
+
+      if (lockedTapCount >= TAP_THRESHOLD) {
+        lockedTapCount = 0;
+        openUnlockModal();
+      }
+    }
+
+    function openUnlockModal() {
+      const modal = document.getElementById('unlock-modal');
+      const input = document.getElementById('unlock-input');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        input?.focus();
+      }
+    }
+
+    function closeUnlockModal() {
+      const modal = document.getElementById('unlock-modal');
+      const input = document.getElementById('unlock-input');
+      const error = document.getElementById('unlock-error');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+      if (input) input.value = '';
+      if (error) error.classList.add('hidden');
+    }
+
+    async function handleUnlockSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('unlock-input');
+      const error = document.getElementById('unlock-error');
+      const password = input?.value;
+
+      if (!password) return;
+
+      try {
+        const response = await fetch('/api/unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
+        });
+
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          if (error) {
+            error.textContent = '...';
+            error.classList.remove('hidden');
+          }
+          if (input) input.value = '';
+        }
+      } catch {
+        if (error) {
+          error.textContent = '...';
+          error.classList.remove('hidden');
+        }
+      }
+    }
+
+    async function loadManifest() {
+      try {
+        const response = await fetch('/api/manifest');
+        if (response.ok) {
+          currentManifest = await response.json();
+          renderGames();
+        }
+      } catch {
+        // Use static manifest as fallback
+      }
+    }
+
     function renderGames() {
       const container = document.getElementById('games-container');
       if (!container) return;
 
       const currentDay = getCurrentDay();
+      const fullyUnlocked = isFullyUnlocked();
       const gamesByDay = {};
 
-      manifest.games.forEach((game) => {
+      currentManifest.games.forEach((game) => {
         gamesByDay[game.day] = game;
       });
 
@@ -133,10 +284,10 @@ const year = manifest.year;
       for (let day = 1; day <= 25; day++) {
         const game = gamesByDay[day];
         const dateStr = formatDate(day);
-        const isUnlocked = day <= currentDay;
-        const isNextDay = day === currentDay + 1;
+        const isUnlocked = day <= currentDay || fullyUnlocked;
+        const isNextDay = day === currentDay + 1 && !fullyUnlocked;
 
-        if (game && isUnlocked) {
+        if (game && game.slug && isUnlocked) {
           // Unlocked game with thumbnail
           html += `
             <button data-game='${JSON.stringify({ ...game, dateStr })}' class="game-tile group relative aspect-square block overflow-hidden border-2 border-white/20 bg-black/90 transition-all hover:border-neon-blue hover:scale-105 w-full">
@@ -156,7 +307,7 @@ const year = manifest.year;
           const timeUntil = getTimeUntilUnlock(day);
           if (timeUntil) {
             html += `
-              <div class="relative aspect-square overflow-hidden border-2 border-purple-500/30 bg-black/90">
+              <div class="locked-tile relative aspect-square overflow-hidden border-2 border-purple-500/30 bg-black/90 cursor-pointer">
                 <div class="from-neon-purple to-neon-pink absolute -inset-[2px] animate-pulse bg-gradient-to-br opacity-30 blur-sm"></div>
                 <div class="relative flex h-full w-full flex-col items-center justify-center p-1">
                   <div class="font-display text-[0.5rem] md:text-xs text-purple-300/60 mb-0.5 md:mb-1 truncate w-full text-center">${dateStr}</div>
@@ -171,7 +322,7 @@ const year = manifest.year;
         } else if (!isUnlocked) {
           // Locked future day
           html += `
-            <div class="relative aspect-square overflow-hidden border-2 border-white/10 bg-black/80 opacity-60">
+            <div class="locked-tile relative aspect-square overflow-hidden border-2 border-white/10 bg-black/80 opacity-60 cursor-pointer">
               <div class="relative flex h-full w-full flex-col items-center justify-center p-1">
                 <div class="font-display text-[0.5rem] md:text-xs text-blue-300/40 mb-0.5 md:mb-1 truncate w-full text-center">${dateStr}</div>
                 <div class="text-base md:text-2xl opacity-30">🔒</div>
@@ -194,7 +345,7 @@ const year = manifest.year;
       container.innerHTML = html;
 
       // Setup countdown for next day only
-      if (currentDay < 25) {
+      if (currentDay < 25 && !fullyUnlocked) {
         const nextDay = currentDay + 1;
         const countdownEl = document.getElementById(`countdown-${nextDay}`);
 
@@ -210,8 +361,16 @@ const year = manifest.year;
         }
       }
 
-      // Setup modal event listeners
+      // Setup event listeners
       setupModalListeners();
+      setupLockedTileListeners();
+    }
+
+    function setupLockedTileListeners() {
+      const lockedTiles = document.querySelectorAll('.locked-tile');
+      lockedTiles.forEach((tile) => {
+        tile.addEventListener('click', handleLockedTap);
+      });
     }
 
     function setupModalListeners() {
@@ -263,12 +422,30 @@ const year = manifest.year;
       }
     }
 
-    // Handle ESC key to close modal
+    // Setup unlock modal listeners
+    function setupUnlockModalListeners() {
+      const unlockModal = document.getElementById('unlock-modal');
+      const closeUnlockBtn = document.getElementById('close-unlock-modal');
+      const unlockForm = document.getElementById('unlock-form');
+
+      closeUnlockBtn?.addEventListener('click', closeUnlockModal);
+      unlockModal?.addEventListener('click', (e) => {
+        if (e.target === unlockModal) closeUnlockModal();
+      });
+      unlockForm?.addEventListener('submit', handleUnlockSubmit);
+    }
+
+    // Handle ESC key to close modals
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') {
+        closeModal();
+        closeUnlockModal();
+      }
     });
 
-    renderGames();
+    // Initialize
+    setupUnlockModalListeners();
+    loadManifest();
     setInterval(renderGames, 60000);
   </script>
 </Layout>

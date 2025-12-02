@@ -42,7 +42,7 @@ function execCommand(command, cwd, description) {
   }
 }
 
-async function buildGame(game) {
+async function buildGame(game, baseUrl) {
   const { day, title, repo, branch, buildConfig } = game;
 
   if (!repo) {
@@ -99,9 +99,10 @@ async function buildGame(game) {
       html = html.replace(/href="\//g, 'href="');
       html = html.replace(/src="\//g, 'src="');
 
-      // Inject SHARE_URL env var - the parent page URL for sharing
+      // Inject SHARE_URL env var - the absolute parent page URL for sharing
       const slug = game.slug || `day-${day}`;
-      const shareUrlScript = `<script>window.SHARE_URL = "/day/${day}/${slug}";</script>`;
+      const shareUrl = `${baseUrl}/day/${day}/${slug}`;
+      const shareUrlScript = `<script>window.SHARE_URL = "${shareUrl}";</script>`;
       html = html.replace('<head>', `<head>\n    ${shareUrlScript}`);
 
       await fs.writeFile(indexHtmlPath, html, 'utf-8');
@@ -141,9 +142,11 @@ async function main() {
   let successCount = 0;
   let failCount = 0;
 
+  const baseUrl = manifest.baseUrl || 'https://adventofgames.dev';
+
   for (const game of manifest.games) {
     try {
-      await buildGame(game);
+      await buildGame(game, baseUrl);
       successCount++;
     } catch (error) {
       failCount++;
