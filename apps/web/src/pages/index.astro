@@ -1,37 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import rawManifest from '../games-manifest.json';
+import manifest from '../games-manifest.json';
 
-const year = rawManifest.year;
-
-// Strip slugs from future games in static build
-function getCurrentDay(): number {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonth = now.getMonth() + 1;
-  const currentDate = now.getDate();
-
-  if (currentYear === year && currentMonth === 12) {
-    return Math.min(currentDate, 25);
-  }
-  if (currentYear > year || (currentYear === year && currentMonth > 12)) {
-    return 25;
-  }
-  return 0;
-}
-
-const currentDay = getCurrentDay();
-const sanitizedManifest = {
-  ...rawManifest,
-  games: rawManifest.games.map((game) => {
-    if (game.day <= currentDay) {
-      return game;
-    }
-    // Strip slug from future games
-    const { slug, ...rest } = game;
-    return rest;
-  }),
-};
+const year = manifest.year;
 ---
 
 <Layout title="Advent of Games">
@@ -137,7 +108,7 @@ const sanitizedManifest = {
     </div>
   </main>
 
-  <script define:vars={{ manifest: sanitizedManifest, year }}>
+  <script define:vars={{ manifest, year }}>
     let currentManifest = manifest;
     let lockedTapCount = 0;
     let lastTapTime = 0;
