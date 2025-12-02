@@ -231,11 +231,11 @@ const year = manifest.year;
         const response = await fetch('/api/manifest');
         if (response.ok) {
           currentManifest = await response.json();
-          renderGames();
         }
       } catch {
         // Use static manifest as fallback
       }
+      renderGames();
     }
 
     function renderGames() {
