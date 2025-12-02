@@ -100,7 +100,13 @@ const year = manifest.year;
                 class="w-full border-2 border-white/20 bg-black/50 px-4 py-3 text-center text-white placeholder-white/20 focus:border-white/40 focus:outline-none"
                 autocomplete="off"
               />
-              <div id="unlock-error" class="mt-2 hidden text-center text-sm text-red-400"></div>
+              <div id="unlock-error" class="mt-2 hidden text-center text-sm text-red-400">✗</div>
+              <button
+                type="submit"
+                class="mt-4 w-full border-2 border-white/20 bg-white/10 px-4 py-3 text-sm text-white/60 transition-all hover:border-white/40 hover:bg-white/20 hover:text-white"
+              >
+                →
+              </button>
             </form>
           </div>
         </div>
@@ -213,29 +219,16 @@ const year = manifest.year;
           window.location.reload();
         } else {
           if (error) {
-            error.textContent = '...';
             error.classList.remove('hidden');
           }
           if (input) input.value = '';
         }
-      } catch {
+      } catch (err) {
+        console.error('Unlock error:', err);
         if (error) {
-          error.textContent = '...';
           error.classList.remove('hidden');
         }
       }
-    }
-
-    async function loadManifest() {
-      try {
-        const response = await fetch('/api/manifest');
-        if (response.ok) {
-          currentManifest = await response.json();
-        }
-      } catch {
-        // Use static manifest as fallback
-      }
-      renderGames();
     }
 
     function renderGames() {
@@ -416,7 +409,7 @@ const year = manifest.year;
 
     // Initialize
     setupUnlockModalListeners();
-    loadManifest();
+    renderGames();
     setInterval(renderGames, 60000);
   </script>
 </Layout>
