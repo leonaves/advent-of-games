@@ -8,7 +8,7 @@
     "preview": "astro preview",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
-    "typecheck": "astro check"
+    "typecheck": "cp ../../games-manifest.json src/games-manifest.json && astro check"
   },
   "dependencies": {
     "@advent/ui": "workspace:*",

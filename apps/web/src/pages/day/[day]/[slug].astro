@@ -1,9 +1,13 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import manifest from '../../../games-manifest.json';
+import manifestData from '../../../games-manifest.json';
+import type { Manifest, Game } from '../../../types/manifest';
+
+const manifest = manifestData as Manifest;
 
 export function getStaticPaths() {
-  return manifest.games.map((game) => ({
+  const m = manifestData as Manifest;
+  return m.games.map((game: Game) => ({
     params: { day: game.day.toString(), slug: game.slug },
   }));
 }
@@ -11,7 +15,7 @@ export function getStaticPaths() {
 const { day, slug } = Astro.params;
 const dayNumber = parseInt(day || '1');
 
-const game = manifest.games.find((g) => g.slug === slug);
+const game = manifest.games.find((g: Game) => g.slug === slug);
 const gameTitle = game?.title || 'Game';
 const gameHeight = game?.height || '80vh';
 ---

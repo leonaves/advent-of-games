@@ -1,7 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import manifest from '../games-manifest.json';
+import manifestData from '../games-manifest.json';
+import type { Manifest } from '../types/manifest';
 
+const manifest = manifestData as Manifest;
 const year = manifest.year;
 ---
 
