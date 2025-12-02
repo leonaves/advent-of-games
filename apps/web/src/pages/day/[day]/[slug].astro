@@ -1,0 +1,61 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import manifest from '../../../games-manifest.json';
+
+export function getStaticPaths() {
+  return manifest.games.map((game) => ({
+    params: { day: game.day.toString(), slug: game.slug },
+  }));
+}
+
+const { day, slug } = Astro.params;
+const dayNumber = parseInt(day || '1');
+
+const game = manifest.games.find((g) => g.slug === slug);
+const gameTitle = game?.title || 'Game';
+---
+
+<Layout title={`${gameTitle} - Advent of Games`}>
+  <main class="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
+    <div class="container relative z-10 mx-auto px-4 py-8">
+      <div class="mb-6 flex items-center justify-between">
+        <h1
+          class="from-neon-green to-neon-blue bg-gradient-to-r bg-clip-text text-4xl font-bold text-transparent md:text-5xl"
+        >
+          {gameTitle}
+        </h1>
+        <a
+          href="/"
+          class="font-display border-2 border-white/30 bg-white/10 px-6 py-3 text-sm uppercase tracking-widest transition-all hover:border-white hover:bg-white/20"
+        >
+          ← Back
+        </a>
+      </div>
+
+      <div class="relative">
+        <div
+          class="from-neon-blue via-neon-purple to-neon-pink absolute -inset-[4px] bg-gradient-to-r opacity-60 blur-sm"
+        >
+        </div>
+        <div class="relative border-2 border-white/10 bg-black/80 backdrop-blur-xl">
+          <iframe
+            id="game-frame"
+            src={`/games/day-${dayNumber}/index.html`}
+            class="h-[80vh] w-full border-0"
+            title={gameTitle}
+          ></iframe>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const iframe = document.getElementById('game-frame') as HTMLIFrameElement;
+    iframe.addEventListener('load', () => {
+      iframe.contentWindow?.postMessage(
+        { type: 'ADVENT_URL', url: window.location.href },
+        '*'
+      );
+    });
+  </script>
+</Layout>

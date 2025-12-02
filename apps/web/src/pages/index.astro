@@ -7,23 +7,50 @@ const year = manifest.year;
 
 <Layout title="Advent of Games">
   <main class="container relative z-10 mx-auto px-4 py-12">
-    <header class="relative mb-16 text-center">
+    <header class="relative mb-12 text-center">
       <div
-        class="bg-neon-blue/20 pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[200px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
+        class="bg-neon-blue/20 pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[200px] w-[90vw] max-w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
       >
       </div>
       <h1
-        class="font-display to-neon-blue mb-6 bg-gradient-to-b from-white bg-clip-text text-4xl uppercase leading-relaxed tracking-widest text-transparent drop-shadow-[0_0_15px_rgba(0,243,255,0.6)] md:text-6xl"
+        class="font-display to-neon-blue mb-6 bg-gradient-to-b from-white bg-clip-text text-3xl uppercase leading-relaxed tracking-widest text-transparent drop-shadow-[0_0_15px_rgba(0,243,255,0.6)] md:text-5xl"
       >
         Advent of Games
       </h1>
-      <p class="mx-auto mb-12 max-w-2xl font-sans text-2xl tracking-wide text-blue-100">
-        > Daily coding challenges and games._
-      </p>
     </header>
 
-    <div class="mx-auto max-w-5xl space-y-8" id="games-container">
-      <!-- Games will be rendered here by client-side JS -->
+    <div class="mx-auto max-w-6xl">
+      <div class="grid grid-cols-5 gap-2 md:gap-4" id="games-container">
+        <!-- Games will be rendered here by client-side JS -->
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="game-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <div class="relative w-full max-w-2xl">
+        <div class="from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r opacity-60 blur-sm"></div>
+        <div class="relative border-2 border-white/20 bg-black/95 backdrop-blur-xl">
+          <div class="p-6 md:p-8">
+            <div class="mb-6 flex items-start justify-between">
+              <div>
+                <div class="font-display text-xs text-neon-blue mb-2" id="modal-date"></div>
+                <h2 class="font-display text-2xl md:text-3xl text-white mb-2" id="modal-title"></h2>
+              </div>
+              <button id="close-modal" class="text-white/60 hover:text-white transition-colors text-2xl leading-none">×</button>
+            </div>
+
+            <div class="mb-6">
+              <img id="modal-thumbnail" src="" alt="" class="w-full aspect-square object-cover border-2 border-white/10" />
+            </div>
+
+            <p class="text-blue-100/80 text-base md:text-lg mb-8 leading-relaxed" id="modal-description"></p>
+
+            <a id="modal-play-btn" href="" class="font-display block w-full text-center border-2 border-transparent bg-white px-6 py-4 text-sm uppercase tracking-widest text-black shadow-[4px_4px_0px_rgba(0,243,255,0.4)] transition-all hover:-translate-y-1 hover:border-black hover:shadow-[6px_6px_0px_rgba(0,243,255,0.6)] hover:bg-neon-blue">
+              Play Game
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -83,120 +110,61 @@ const year = manifest.year;
 
       let html = '';
 
-      for (let day = 1; day <= currentDay; day++) {
+      for (let day = 1; day <= 25; day++) {
         const game = gamesByDay[day];
         const dateStr = formatDate(day);
+        const isUnlocked = day <= currentDay;
+        const isNextDay = day === currentDay + 1;
 
-        if (game) {
+        if (game && isUnlocked) {
+          // Unlocked game with thumbnail
           html += `
-            <div class="group flex flex-col gap-8 md:flex-row">
-              <div class="flex flex-shrink-0 items-center justify-center gap-2 pt-6 md:w-24 md:flex-col md:items-end md:justify-start">
-                <span class="font-display text-neon-blue text-2xl drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">
-                  Day ${day}
-                </span>
-                <span class="text-sm text-blue-300/60">${dateStr}</span>
+            <button data-game='${JSON.stringify({ ...game, dateStr })}' class="game-tile group relative aspect-square block overflow-hidden border-2 border-white/20 bg-black/90 transition-all hover:border-neon-blue hover:scale-105 w-full">
+              <div class="from-neon-blue to-neon-pink absolute -inset-[2px] bg-gradient-to-br opacity-0 blur-sm transition-opacity duration-300 group-hover:opacity-100"></div>
+              <div class="relative h-full w-full overflow-hidden">
+                <img src="${game.thumbnail}" alt="${game.title}" class="h-full w-full object-cover" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-1 md:p-2">
+                  <div class="font-display text-[0.5rem] md:text-xs text-neon-blue mb-0.5 truncate">${dateStr}</div>
+                  <div class="font-display text-[0.6rem] md:text-sm text-white leading-tight truncate">${game.title}</div>
+                </div>
               </div>
-
-              <div class="group/card relative flex-grow">
-                <div
-                  class="from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r via-purple-500 opacity-60 blur-sm transition-all duration-500 group-hover/card:opacity-100 group-hover/card:blur-md"
-                ></div>
-
-                <div
-                  class="relative h-full border-2 border-white/10 bg-black/80 p-8 backdrop-blur-xl transition-all duration-500 group-hover/card:border-white/30 group-hover/card:bg-black/60"
-                >
-                  <div class="flex flex-col items-center text-center">
-                    <h3 class="font-display mb-4 text-2xl leading-snug tracking-wide text-white">
-                      ${game.title}
-                    </h3>
-                    <p class="mb-8 max-w-lg font-sans text-xl leading-relaxed text-blue-100/80">
-                      ${game.description}
-                    </p>
-
-                    <a
-                      href="/day/${game.day}"
-                      class="hover:bg-neon-blue font-display border-2 border-transparent bg-white px-6 py-4 text-xs uppercase tracking-widest text-black shadow-[4px_4px_0px_rgba(0,243,255,0.4)] transition-all hover:-translate-y-1 hover:border-black hover:shadow-[6px_6px_0px_rgba(0,243,255,0.6)]"
-                    >
-                      Play Game
-                    </a>
+            </button>
+          `;
+        } else if (isNextDay) {
+          // Next day with countdown
+          const timeUntil = getTimeUntilUnlock(day);
+          if (timeUntil) {
+            html += `
+              <div class="relative aspect-square overflow-hidden border-2 border-purple-500/30 bg-black/90">
+                <div class="from-neon-purple to-neon-pink absolute -inset-[2px] animate-pulse bg-gradient-to-br opacity-30 blur-sm"></div>
+                <div class="relative flex h-full w-full flex-col items-center justify-center p-1">
+                  <div class="font-display text-[0.5rem] md:text-xs text-purple-300/60 mb-0.5 md:mb-1 truncate w-full text-center">${dateStr}</div>
+                  <div class="text-base md:text-2xl mb-1 md:mb-2">🎮</div>
+                  <div class="font-display text-[0.5rem] md:text-xs text-neon-purple" id="countdown-${day}">
+                    ${String(timeUntil.hours).padStart(2, '0')}:${String(timeUntil.minutes).padStart(2, '0')}:${String(timeUntil.seconds).padStart(2, '0')}
                   </div>
                 </div>
+              </div>
+            `;
+          }
+        } else if (!isUnlocked) {
+          // Locked future day
+          html += `
+            <div class="relative aspect-square overflow-hidden border-2 border-white/10 bg-black/80 opacity-60">
+              <div class="relative flex h-full w-full flex-col items-center justify-center p-1">
+                <div class="font-display text-[0.5rem] md:text-xs text-blue-300/40 mb-0.5 md:mb-1 truncate w-full text-center">${dateStr}</div>
+                <div class="text-base md:text-2xl opacity-30">🔒</div>
               </div>
             </div>
           `;
         } else {
+          // Unlocked day but no game yet
           html += `
-            <div class="group flex flex-col gap-8 md:flex-row">
-              <div class="flex flex-shrink-0 items-center justify-center gap-2 pt-6 md:w-24 md:flex-col md:items-end md:justify-start">
-                <span class="font-display text-neon-blue text-2xl drop-shadow-[0_0_8px_rgba(0,243,255,0.6)]">
-                  Day ${day}
-                </span>
-                <span class="text-sm text-blue-300/60">${dateStr}</span>
-              </div>
-
-              <div class="group/card relative flex-grow">
-                <div
-                  class="from-neon-blue to-neon-pink absolute -inset-[4px] bg-gradient-to-r via-purple-500 opacity-30 blur-sm"
-                ></div>
-
-                <div
-                  class="relative h-full border-2 border-white/10 bg-black/80 p-8 backdrop-blur-xl opacity-60"
-                >
-                  <div class="flex flex-col items-center text-center">
-                    <span class="text-4xl mb-4">⏳</span>
-                    <h3 class="font-display mb-4 text-2xl leading-snug tracking-wide text-white">
-                      Coming Soon
-                    </h3>
-                    <p class="max-w-lg font-sans text-lg leading-relaxed text-blue-100/60">
-                      This game is still being prepared...
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-        }
-      }
-
-      if (currentDay < 25) {
-        const nextDay = currentDay + 1;
-        const timeUntil = getTimeUntilUnlock(nextDay);
-        const dateStr = formatDate(nextDay);
-
-        if (timeUntil) {
-          html += `
-            <div class="group flex flex-col gap-8 md:flex-row">
-              <div class="flex flex-shrink-0 items-center justify-center gap-2 pt-6 md:w-24 md:flex-col md:items-end md:justify-start">
-                <span class="font-display text-neon-purple text-2xl drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]">
-                  Day ${nextDay}
-                </span>
-                <span class="text-sm text-purple-300/60">${dateStr}</span>
-              </div>
-
-              <div class="group/card relative flex-grow">
-                <div
-                  class="from-neon-purple to-neon-pink absolute -inset-[4px] animate-pulse bg-gradient-to-r opacity-40 blur-sm"
-                ></div>
-
-                <div
-                  class="relative h-full border-2 border-purple-500/20 bg-black/90 p-8 backdrop-blur-xl overflow-hidden"
-                >
-                  <div class="absolute inset-0 backdrop-blur-[8px] bg-black/40"></div>
-
-                  <div class="relative flex flex-col items-center text-center">
-                    <div class="text-6xl mb-4 blur-md select-none">🎮</div>
-                    <h3 class="font-display mb-4 text-2xl leading-snug tracking-wide text-white/40 blur-sm">
-                      Next Game
-                    </h3>
-                    <p class="mb-6 max-w-lg font-sans text-lg leading-relaxed text-purple-100/60">
-                      Unlocks in
-                    </p>
-
-                    <div class="font-display text-3xl text-neon-purple drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]" id="countdown-${nextDay}">
-                      ${String(timeUntil.hours).padStart(2, '0')}:${String(timeUntil.minutes).padStart(2, '0')}:${String(timeUntil.seconds).padStart(2, '0')}
-                    </div>
-                  </div>
-                </div>
+            <div class="relative aspect-square overflow-hidden border-2 border-white/10 bg-black/80 opacity-60">
+              <div class="relative flex h-full w-full flex-col items-center justify-center p-1">
+                <div class="font-display text-[0.5rem] md:text-xs text-blue-300/40 mb-0.5 md:mb-1 truncate w-full text-center">${dateStr}</div>
+                <div class="text-base md:text-2xl">⏳</div>
               </div>
             </div>
           `;
@@ -205,6 +173,7 @@ const year = manifest.year;
 
       container.innerHTML = html;
 
+      // Setup countdown for next day only
       if (currentDay < 25) {
         const nextDay = currentDay + 1;
         const countdownEl = document.getElementById(`countdown-${nextDay}`);
@@ -221,7 +190,64 @@ const year = manifest.year;
           }, 1000);
         }
       }
+
+      // Setup modal event listeners
+      setupModalListeners();
     }
+
+    function setupModalListeners() {
+      const modal = document.getElementById('game-modal');
+      const closeBtn = document.getElementById('close-modal');
+      const gameTiles = document.querySelectorAll('.game-tile');
+
+      gameTiles.forEach((tile) => {
+        tile.addEventListener('click', () => {
+          const gameData = JSON.parse(tile.getAttribute('data-game'));
+          openModal(gameData);
+        });
+      });
+
+      closeBtn?.addEventListener('click', closeModal);
+      modal?.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+    }
+
+    function openModal(game) {
+      const modal = document.getElementById('game-modal');
+      const modalDate = document.getElementById('modal-date');
+      const modalTitle = document.getElementById('modal-title');
+      const modalThumbnail = document.getElementById('modal-thumbnail');
+      const modalDescription = document.getElementById('modal-description');
+      const modalPlayBtn = document.getElementById('modal-play-btn');
+
+      if (modalDate) modalDate.textContent = game.dateStr;
+      if (modalTitle) modalTitle.textContent = game.title;
+      if (modalThumbnail) {
+        modalThumbnail.src = game.thumbnail;
+        modalThumbnail.alt = game.title;
+      }
+      if (modalDescription) modalDescription.textContent = game.description;
+      if (modalPlayBtn) modalPlayBtn.href = `/${game.slug}`;
+
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('game-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    // Handle ESC key to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
 
     renderGames();
     setInterval(renderGames, 60000);

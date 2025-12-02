@@ -203,8 +203,14 @@ advent-of-games/
 
 ## Deployment
 
-The project deploys to **Cloudflare Pages** via Wrangler:
+The project deploys to **Cloudflare Pages** automatically via GitHub integration.
 
+**Preferred deployment method:**
+1. Commit your changes to git
+2. Push to the main branch on GitHub
+3. Cloudflare Pages automatically builds and deploys
+
+**Manual deployment (if needed):**
 1. `pnpm build` runs:
    - `node scripts/build-games.js` (builds all games)
    - `pnpm --filter web build` (builds Astro site)

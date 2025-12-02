@@ -9,9 +9,17 @@
   --color-christmas-midnight: #0f172a;
 }
 
+html {
+  overflow-x: hidden;
+  width: 100%;
+}
+
 body {
   background-color: var(--color-christmas-midnight);
   color: white;
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
 }
 
 .stars {

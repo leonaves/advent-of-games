@@ -97,8 +97,8 @@ async function buildGame(game) {
     await fs.remove(outputGameDir);
     await fs.copy(buildOutputPath, outputGameDir);
 
-    // Fix asset paths in HTML to be relative
-    log(`\n🔧 Fixing asset paths...`, colors.cyan);
+    // Fix asset paths and inject env vars in HTML
+    log(`\n🔧 Fixing asset paths and injecting env vars...`, colors.cyan);
     const indexHtmlPath = path.join(outputGameDir, 'index.html');
     if (fs.existsSync(indexHtmlPath)) {
       let html = await fs.readFile(indexHtmlPath, 'utf-8');
@@ -106,6 +106,17 @@ async function buildGame(game) {
       // Replace absolute paths with relative paths
       html = html.replace(/href="\//g, 'href="');
       html = html.replace(/src="\//g, 'src="');
+
+      // Inject listener for ADVENT_URL from parent frame
+      const adventUrlScript = `<script>
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'ADVENT_URL') {
+        window.ADVENT_URL = e.data.url;
+        window.dispatchEvent(new CustomEvent('advent-url-ready', { detail: e.data.url }));
+      }
+    });
+    </script>`;
+      html = html.replace('<head>', `<head>${adventUrlScript}`);
 
       await fs.writeFile(indexHtmlPath, html, 'utf-8');
     }
