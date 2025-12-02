@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 
 export const prerender = false;
 
+// Random search terms to get diverse IKEA products
 const SEARCH_TERMS = [
   'lamp',
   'chair',
@@ -92,7 +93,7 @@ export const GET: APIRoute = async ({ request }) => {
         'Cache-Control': 'public, max-age=300',
       },
     });
-  } catch {
+  } catch (error) {
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: {

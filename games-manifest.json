@@ -1,6 +1,6 @@
 {
   "year": 2025,
-  "baseUrl": "https://adventofgames.dev",
+  "baseUrl": "https://adventofgames.com",
   "games": [
     {
       "day": 1,
@@ -43,6 +43,7 @@
       "slug": "ikea-guesser",
       "thumbnail": "/thumbnails/ikea-guesser.png",
       "description": "Test your IKEA knowledge! Guess the price of random products using the slider - track your accuracy and build streaks for the best score.",
+      "height": "100vh",
       "repo": "https://github.com/leonaves/ikea-guesser",
       "branch": "main",
       "buildConfig": {
@@ -51,7 +52,13 @@
         "buildCommand": "npm run build",
         "buildOutputDir": "dist",
         "nodeVersion": "20"
-      }
+      },
+      "apiRoutes": [
+        {
+          "source": "functions/api/ikea-search.ts",
+          "dest": "ikea-search.ts"
+        }
+      ]
     }
   ]
 }

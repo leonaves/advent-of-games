@@ -13,6 +13,7 @@ const MANIFEST_PATH = path.join(ROOT_DIR, 'games-manifest.json');
 const TEMP_DIR = path.join(ROOT_DIR, '.temp-games');
 const OUTPUT_DIR = path.join(ROOT_DIR, 'apps/web/public/games');
 const WEB_MANIFEST_PATH = path.join(ROOT_DIR, 'apps/web/src/games-manifest.json');
+const API_ROUTES_DIR = path.join(ROOT_DIR, 'apps/web/src/pages/api');
 
 // Colors for terminal output
 const colors = {
@@ -108,6 +109,30 @@ async function buildGame(game, baseUrl) {
       await fs.writeFile(indexHtmlPath, html, 'utf-8');
     }
 
+    // Copy API routes if specified
+    if (game.apiRoutes && game.apiRoutes.length > 0) {
+      log(`\n🔌 Copying API routes...`, colors.cyan);
+      await fs.ensureDir(API_ROUTES_DIR);
+
+      for (const route of game.apiRoutes) {
+        const sourcePath = path.join(tempGameDir, route.source);
+        const destPath = path.join(API_ROUTES_DIR, route.dest);
+
+        if (fs.existsSync(sourcePath)) {
+          // Read the source file and convert to Astro API route format
+          let content = await fs.readFile(sourcePath, 'utf-8');
+
+          // Convert Cloudflare Pages Function to Astro API route
+          content = convertToAstroApiRoute(content);
+
+          await fs.writeFile(destPath, content, 'utf-8');
+          log(`  → Copied ${route.source} to ${route.dest}`, colors.cyan);
+        } else {
+          log(`  ⚠ API route source not found: ${route.source}`, colors.yellow);
+        }
+      }
+    }
+
     log(`\n✓ Successfully built day ${day}: ${title}`, colors.green);
     log(`  Output: ${outputGameDir}`, colors.green);
   } catch (error) {
@@ -115,6 +140,36 @@ async function buildGame(game, baseUrl) {
     log(`  Error: ${error.message}`, colors.red);
     throw error;
   }
+}
+
+// Convert Cloudflare Pages Function to Astro API route
+function convertToAstroApiRoute(content) {
+  // Add Astro imports and prerender export
+  let astroContent = `import type { APIRoute } from 'astro';\n\nexport const prerender = false;\n\n`;
+
+  // Remove Cloudflare-specific interface
+  content = content.replace(/interface Env \{[^}]*\}\n*/g, '');
+
+  // Convert onRequestGet to GET
+  content = content.replace(
+    /export const onRequestGet: PagesFunction<Env> = async \(context\) => \{/g,
+    'export const GET: APIRoute = async ({ request }) => {'
+  );
+  content = content.replace(/context\.request/g, 'request');
+
+  // Convert onRequestPost to POST
+  content = content.replace(
+    /export const onRequestPost: PagesFunction<Env> = async \(context\) => \{/g,
+    'export const POST: APIRoute = async ({ request }) => {'
+  );
+
+  // Convert onRequestOptions to OPTIONS
+  content = content.replace(
+    /export const onRequestOptions: PagesFunction<Env> = async \(\) => \{/g,
+    'export const OPTIONS: APIRoute = async () => {'
+  );
+
+  return astroContent + content;
 }
 
 async function main() {
@@ -142,7 +197,7 @@ async function main() {
   let successCount = 0;
   let failCount = 0;
 
-  const baseUrl = manifest.baseUrl || 'https://adventofgames.dev';
+  const baseUrl = manifest.baseUrl || 'https://adventofgames.com';
 
   for (const game of manifest.games) {
     try {

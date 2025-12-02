@@ -13,6 +13,7 @@ const dayNumber = parseInt(day || '1');
 
 const game = manifest.games.find((g) => g.slug === slug);
 const gameTitle = game?.title || 'Game';
+const gameHeight = game?.height || '80vh';
 ---
 
 <Layout title={`${gameTitle} - Advent of Games`}>
@@ -40,7 +41,8 @@ const gameTitle = game?.title || 'Game';
         <div class="relative border-2 border-white/10 bg-black/80 backdrop-blur-xl">
           <iframe
             src={`/games/day-${dayNumber}/index.html`}
-            class="h-[80vh] w-full border-0"
+            style={`height: ${gameHeight};`}
+            class="w-full border-0"
             title={gameTitle}></iframe>
         </div>
       </div>
