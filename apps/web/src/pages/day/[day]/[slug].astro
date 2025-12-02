@@ -39,7 +39,6 @@ const gameTitle = game?.title || 'Game';
         </div>
         <div class="relative border-2 border-white/10 bg-black/80 backdrop-blur-xl">
           <iframe
-            id="game-frame"
             src={`/games/day-${dayNumber}/index.html`}
             class="h-[80vh] w-full border-0"
             title={gameTitle}
@@ -48,14 +47,4 @@ const gameTitle = game?.title || 'Game';
       </div>
     </div>
   </main>
-
-  <script>
-    const iframe = document.getElementById('game-frame') as HTMLIFrameElement;
-    iframe.addEventListener('load', () => {
-      iframe.contentWindow?.postMessage(
-        { type: 'ADVENT_URL', url: window.location.href },
-        '*'
-      );
-    });
-  </script>
 </Layout>

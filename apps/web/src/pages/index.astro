@@ -228,7 +228,7 @@ const year = manifest.year;
         modalThumbnail.alt = game.title;
       }
       if (modalDescription) modalDescription.textContent = game.description;
-      if (modalPlayBtn) modalPlayBtn.href = `/${game.slug}`;
+      if (modalPlayBtn) modalPlayBtn.href = `/day/${game.day}/${game.slug}`;
 
       if (modal) {
         modal.classList.remove('hidden');

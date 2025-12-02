@@ -107,16 +107,10 @@ async function buildGame(game) {
       html = html.replace(/href="\//g, 'href="');
       html = html.replace(/src="\//g, 'src="');
 
-      // Inject listener for ADVENT_URL from parent frame
-      const adventUrlScript = `<script>
-    window.addEventListener('message', function(e) {
-      if (e.data && e.data.type === 'ADVENT_URL') {
-        window.ADVENT_URL = e.data.url;
-        window.dispatchEvent(new CustomEvent('advent-url-ready', { detail: e.data.url }));
-      }
-    });
-    </script>`;
-      html = html.replace('<head>', `<head>${adventUrlScript}`);
+      // Inject SHARE_URL env var - the parent page URL for sharing
+      const slug = game.slug || `day-${day}`;
+      const shareUrlScript = `<script>window.SHARE_URL = "/day/${day}/${slug}";</script>`;
+      html = html.replace('<head>', `<head>\n    ${shareUrlScript}`);
 
       await fs.writeFile(indexHtmlPath, html, 'utf-8');
     }
