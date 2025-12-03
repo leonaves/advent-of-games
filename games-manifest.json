@@ -59,6 +59,23 @@
           "dest": "ikea-search.ts"
         }
       ]
+    },
+    {
+      "day": 4,
+      "date": "2025-12-04",
+      "title": "Santa's Flight",
+      "slug": "santas-flight",
+      "thumbnail": "/thumbnails/santas-flight.png",
+      "description": "Help Santa navigate his sleigh through the night sky!",
+      "repo": "https://github.com/jackherizsmith/santas-flight",
+      "branch": "main",
+      "buildConfig": {
+        "packageManager": "npm",
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "buildOutputDir": "dist",
+        "nodeVersion": "20"
+      }
     }
   ]
 }
