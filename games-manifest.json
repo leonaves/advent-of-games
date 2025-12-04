@@ -76,6 +76,23 @@
         "buildOutputDir": "dist",
         "nodeVersion": "20"
       }
+    },
+    {
+      "day": 5,
+      "date": "2025-12-05",
+      "title": "Ball in a Mazele",
+      "slug": "ball-in-a-mazele",
+      "thumbnail": "/thumbnails/ball-in-a-mazele.png",
+      "description": "Navigate the ball through the maze to reach the goal!",
+      "repo": "https://github.com/alexFaunt/ball-in-a-mazele",
+      "branch": "main",
+      "buildConfig": {
+        "packageManager": "npm",
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "buildOutputDir": "dist",
+        "nodeVersion": "20"
+      }
     }
   ]
 }
