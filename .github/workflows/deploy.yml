@@ -3,6 +3,13 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      clear_cache:
+        description: 'Clear pnpm cache before build'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   deploy:
@@ -32,6 +39,7 @@ jobs:
           echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
       - name: Setup pnpm cache
+        if: ${{ !inputs.clear_cache }}
         uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
