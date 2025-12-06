@@ -101,13 +101,13 @@
       "slug": "nomoji",
       "thumbnail": "/thumbnails/nomoji.png",
       "description": "A fun emoji guessing game!",
-      "repo": "https://github.com/jackherizsmith/nomoji",
+      "repo": "https://github.com/leonaves/nomoji",
       "branch": "main",
       "buildConfig": {
         "packageManager": "npm",
         "installCommand": "npm install",
         "buildCommand": "npm run build",
-        "buildOutputDir": "dist",
+        "buildOutputDir": "out",
         "nodeVersion": "20"
       }
     }
