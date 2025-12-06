@@ -93,6 +93,23 @@
         "buildOutputDir": "dist",
         "nodeVersion": "20"
       }
+    },
+    {
+      "day": 6,
+      "date": "2025-12-06",
+      "title": "Nomoji",
+      "slug": "nomoji",
+      "thumbnail": "/thumbnails/nomoji.png",
+      "description": "A fun emoji guessing game!",
+      "repo": "https://github.com/jackherizsmith/nomoji",
+      "branch": "main",
+      "buildConfig": {
+        "packageManager": "npm",
+        "installCommand": "npm install",
+        "buildCommand": "npm run build",
+        "buildOutputDir": "dist",
+        "nodeVersion": "20"
+      }
     }
   ]
 }
