@@ -108,7 +108,8 @@
         "installCommand": "npm install",
         "buildCommand": "npm run build",
         "buildOutputDir": "out",
-        "nodeVersion": "20"
+        "nodeVersion": "20",
+        "usesBasePath": true
       }
     }
   ]

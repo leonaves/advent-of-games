@@ -90,11 +90,20 @@ async function buildGame(game, baseUrl) {
     await fs.remove(outputGameDir);
     await fs.copy(buildOutputPath, outputGameDir);
 
-    // Inject env vars in HTML
-    log(`\n🔧 Injecting env vars...`, colors.cyan);
+    // Fix asset paths and inject env vars in HTML
+    log(`\n🔧 Fixing asset paths and injecting env vars...`, colors.cyan);
     const indexHtmlPath = path.join(outputGameDir, 'index.html');
     if (fs.existsSync(indexHtmlPath)) {
       let html = await fs.readFile(indexHtmlPath, 'utf-8');
+
+      // Only rewrite paths for games that don't use Next.js basePath
+      // (Next.js with basePath already has correct absolute paths)
+      const usesBasePath = buildConfig.usesBasePath || false;
+      if (!usesBasePath) {
+        // Replace absolute paths with relative paths in attributes
+        html = html.replace(/href="\//g, 'href="');
+        html = html.replace(/src="\//g, 'src="');
+      }
 
       // Inject SHARE_URL env var - the absolute parent page URL for sharing
       const slug = game.slug || `day-${day}`;
