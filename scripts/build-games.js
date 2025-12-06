@@ -96,9 +96,13 @@ async function buildGame(game, baseUrl) {
     if (fs.existsSync(indexHtmlPath)) {
       let html = await fs.readFile(indexHtmlPath, 'utf-8');
 
-      // Replace absolute paths with relative paths
+      // Replace absolute paths with relative paths in attributes
       html = html.replace(/href="\//g, 'href="');
       html = html.replace(/src="\//g, 'src="');
+
+      // Fix Next.js RSC payload paths (inside inline scripts)
+      // These are JSON strings like "/_next/static/chunks/..." that need to be relative
+      html = html.replace(/"\/_next\//g, '"_next/');
 
       // Inject SHARE_URL env var - the absolute parent page URL for sharing
       const slug = game.slug || `day-${day}`;
